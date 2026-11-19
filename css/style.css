@@ -443,7 +443,8 @@ a:hover { color: var(--gold); }
 /* =====================================================================
    The Details — ceremony & reception
    ===================================================================== */
-.detail-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: clamp(1.5rem, 4vw, 3rem); }
+.detail-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(1rem, 2vw, 1.8rem); align-items: stretch; }
+
 .detail-card {
   background: #fff;
   border: 1px solid var(--blush-deep);
