@@ -2,7 +2,7 @@
 /* =====================================================================
    EVERLY — Complete Website Behaviour
    Vanilla JavaScript | Zero Dependencies
-   Auto Scroll | Tap Anywhere to Play / Pause
+   Auto Scroll | Tap to Play/Pause | Pause on Interaction
    ===================================================================== */
 
 (function () {
@@ -22,10 +22,7 @@
     if (!header) return;
 
     var onScroll = function () {
-      header.classList.toggle(
-        'is-stuck',
-        window.scrollY > 40
-      );
+      header.classList.toggle('is-stuck', window.scrollY > 40);
     };
 
     onScroll();
@@ -175,7 +172,6 @@
     links.forEach(function (link) {
 
       var id = link.getAttribute('href').slice(1);
-
       var sec = document.getElementById(id);
 
       if (sec) {
@@ -301,9 +297,13 @@
   }
 
 
-  /* ---- Auto Scroll: Tap Anywhere to Play / Pause -------------------- */
+  /* ---- Auto Scroll: Tap to Play / Pause ----------------------------- */
 
   function initAutoScroll() {
+
+    if (window.everlyAutoScrollInitialized) return;
+
+    window.everlyAutoScrollInitialized = true;
 
     var running = false;
     var animation = null;
@@ -312,26 +312,22 @@
     var speed = 25; // Pixels per second
     var loop = true;
 
-    // Prevent accidental double initialization
-    if (window.everlyAutoScrollInitialized) return;
-
-    window.everlyAutoScrollInitialized = true;
-
 
     /* Start scrolling */
+
     function startScroll() {
 
       if (running || reduceMotion) return;
 
       running = true;
-
       lastTime = 0;
 
       animation = requestAnimationFrame(scrollFrame);
     }
 
 
-    /* Pause without resetting scroll position */
+    /* Pause scrolling without resetting position */
+
     function pauseScroll() {
 
       running = false;
@@ -347,7 +343,18 @@
     }
 
 
-    /* Scroll animation */
+    /* Check mobile navigation */
+
+    function isMenuOpen() {
+
+      var menu = document.getElementById('navMenu');
+
+      return menu && menu.classList.contains('open');
+    }
+
+
+    /* Scrolling animation */
+
     function scrollFrame(time) {
 
       if (!running) return;
@@ -360,10 +367,7 @@
 
       lastTime = time;
 
-      var menu = document.getElementById('navMenu');
-
-      // Pause scrolling while mobile menu is open
-      if (!menu || !menu.classList.contains('open')) {
+      if (!isMenuOpen()) {
 
         var maxScroll =
           document.documentElement.scrollHeight -
@@ -375,7 +379,7 @@
 
             if (loop) {
 
-              // Restart only after reaching the bottom
+              // Loop only after reaching the bottom
               window.scrollTo(0, 0);
 
             } else {
@@ -399,7 +403,8 @@
     }
 
 
-    /* Check whether the user tapped an interactive element */
+    /* Identify buttons, links and form elements */
+
     function isInteractive(target) {
 
       if (!target || !target.closest) return false;
@@ -407,46 +412,105 @@
       return !!target.closest(
         'a, button, input, textarea, select, label, ' +
         'form, video, audio, [role="button"], ' +
-        '[contenteditable="true"], #navToggle, #navBackdrop'
+        '[contenteditable="true"], [role="checkbox"], ' +
+        '[role="radio"], [role="switch"], ' +
+        '#navToggle, #navBackdrop'
       );
     }
 
 
-    /* Tap anywhere to toggle Play / Pause */
+    /* Pause immediately when user touches a control */
+
+    document.addEventListener('pointerdown', function (e) {
+
+      if (isInteractive(e.target)) {
+        pauseScroll();
+      }
+
+    }, true);
+
+
+    /* Also support keyboard and accessibility focus */
+
+    document.addEventListener('focusin', function (e) {
+
+      if (isInteractive(e.target)) {
+        pauseScroll();
+      }
+
+    }, true);
+
+
+    /* Pause when clicking interactive elements.
+       Tap empty areas to toggle Play / Pause. */
+
     document.addEventListener('click', function (e) {
 
-      // Don't interrupt buttons, links or forms
-      if (isInteractive(e.target)) return;
+      if (isInteractive(e.target)) {
 
-      // Ignore clicks when mobile menu is open
-      var menu = document.getElementById('navMenu');
+        pauseScroll();
 
-      if (menu && menu.classList.contains('open')) return;
+        return;
+      }
+
+      if (isMenuOpen()) {
+
+        pauseScroll();
+
+        return;
+      }
 
       if (running) {
 
-        // First tap: Pause
+        // Pause at current position
         pauseScroll();
-
-        console.log('Everly scrolling paused');
 
       } else {
 
-        // Second tap: Resume from current position
+        // Resume at current position
         startScroll();
+      }
 
-        console.log('Everly scrolling resumed');
+    });
+
+
+    /* Pause when user starts typing */
+
+    document.addEventListener('keydown', function (e) {
+
+      if (
+        isInteractive(e.target) &&
+        e.key !== 'Tab' &&
+        e.key !== 'Shift' &&
+        e.key !== 'Control' &&
+        e.key !== 'Alt'
+      ) {
+        pauseScroll();
+      }
+
+    }, true);
+
+
+    /* Pause when the page becomes hidden */
+
+    document.addEventListener('visibilitychange', function () {
+
+      if (document.hidden) {
+        pauseScroll();
       }
 
     });
 
 
     /* Automatically start when website opens */
+
     if (!reduceMotion) {
       startScroll();
     }
 
-    console.log('Everly Tap-to-Play/Pause initialized!');
+    console.log(
+      'Everly Auto Scroll initialized successfully!'
+    );
   }
 
 
