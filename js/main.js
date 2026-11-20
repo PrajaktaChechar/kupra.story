@@ -1,6 +1,8 @@
 
 /* =====================================================================
-   Everly — template behaviour + Auto Scroll (vanilla JS, zero dependencies)
+   EVERLY — Complete Website Behaviour
+   Vanilla JavaScript | Zero Dependencies
+   Auto Scroll | Tap Anywhere to Play / Pause
    ===================================================================== */
 
 (function () {
@@ -10,21 +12,34 @@
     '(prefers-reduced-motion: reduce)'
   ).matches;
 
-  /* ---- Sticky header ------------------------------------------------ */
+
+  /* ---- Sticky Header ------------------------------------------------ */
+
   function initHeader() {
+
     var header = document.getElementById('siteHeader');
+
     if (!header) return;
 
     var onScroll = function () {
-      header.classList.toggle('is-stuck', window.scrollY > 40);
+      header.classList.toggle(
+        'is-stuck',
+        window.scrollY > 40
+      );
     };
 
     onScroll();
-    window.addEventListener('scroll', onScroll, { passive: true });
+
+    window.addEventListener('scroll', onScroll, {
+      passive: true
+    });
   }
 
-  /* ---- Mobile navigation -------------------------------------------- */
+
+  /* ---- Mobile Navigation -------------------------------------------- */
+
   function initMobileNav() {
+
     var toggle = document.getElementById('navToggle');
     var menu = document.getElementById('navMenu');
     var backdrop = document.getElementById('navBackdrop');
@@ -32,9 +47,18 @@
     if (!toggle || !menu) return;
 
     var open = function (state) {
+
       menu.classList.toggle('open', state);
-      toggle.setAttribute('aria-expanded', state ? 'true' : 'false');
-      toggle.setAttribute('aria-label', state ? 'Close menu' : 'Open menu');
+
+      toggle.setAttribute(
+        'aria-expanded',
+        state ? 'true' : 'false'
+      );
+
+      toggle.setAttribute(
+        'aria-label',
+        state ? 'Close menu' : 'Open menu'
+      );
 
       if (backdrop) {
         backdrop.hidden = false;
@@ -55,28 +79,45 @@
     }
 
     menu.addEventListener('click', function (e) {
-      if (e.target.closest('a')) open(false);
+      if (e.target.closest('a')) {
+        open(false);
+      }
     });
 
     document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape' && menu.classList.contains('open')) {
+
+      if (
+        e.key === 'Escape' &&
+        menu.classList.contains('open')
+      ) {
         open(false);
       }
     });
 
     window.addEventListener('resize', function () {
-      if (window.innerWidth > 767 && menu.classList.contains('open')) {
+
+      if (
+        window.innerWidth > 767 &&
+        menu.classList.contains('open')
+      ) {
         open(false);
       }
     });
   }
 
+
   /* ---- Countdown ---------------------------------------------------- */
+
   function initCountdown() {
+
     var box = document.getElementById('countdown');
+
     if (!box) return;
 
-    var target = new Date(box.getAttribute('data-date')).getTime();
+    var target = new Date(
+      box.getAttribute('data-date')
+    ).getTime();
+
     if (isNaN(target)) return;
 
     var els = {
@@ -92,7 +133,9 @@
     };
 
     var tick = function () {
+
       var diff = target - Date.now();
+
       if (diff < 0) diff = 0;
 
       var d = Math.floor(diff / 86400000);
@@ -108,22 +151,31 @@
     };
 
     tick();
+
     setInterval(tick, 1000);
   }
 
-  /* ---- Scroll-spy active nav link ----------------------------------- */
+
+  /* ---- Scroll Spy --------------------------------------------------- */
+
   function initScrollSpy() {
+
     var links = Array.prototype.slice.call(
       document.querySelectorAll('.nav-menu a[href^="#"]')
     );
 
-    if (!links.length || !('IntersectionObserver' in window)) return;
+    if (
+      !links.length ||
+      !('IntersectionObserver' in window)
+    ) return;
 
     var map = {};
     var sections = [];
 
     links.forEach(function (link) {
+
       var id = link.getAttribute('href').slice(1);
+
       var sec = document.getElementById(id);
 
       if (sec) {
@@ -133,16 +185,23 @@
     });
 
     var obs = new IntersectionObserver(function (entries) {
+
       entries.forEach(function (entry) {
+
         if (entry.isIntersecting) {
+
           links.forEach(function (l) {
             l.classList.remove('active');
           });
 
           var active = map[entry.target.id];
-          if (active) active.classList.add('active');
+
+          if (active) {
+            active.classList.add('active');
+          }
         }
       });
+
     }, {
       rootMargin: '-45% 0px -50% 0px',
       threshold: 0
@@ -153,46 +212,66 @@
     });
   }
 
-  /* ---- Reveal on scroll --------------------------------------------- */
+
+  /* ---- Reveal On Scroll --------------------------------------------- */
+
   function initReveal() {
+
     var items = Array.prototype.slice.call(
       document.querySelectorAll('.reveal')
     );
 
     if (!items.length) return;
 
-    if (reduceMotion || !('IntersectionObserver' in window)) {
+    if (
+      reduceMotion ||
+      !('IntersectionObserver' in window)
+    ) {
+
       items.forEach(function (el) {
         el.classList.add('in');
       });
+
       return;
     }
 
-    var obs = new IntersectionObserver(function (entries, observer) {
-      entries.forEach(function (entry) {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('in');
-          observer.unobserve(entry.target);
-        }
-      });
-    }, {
-      rootMargin: '0px 0px -8% 0px',
-      threshold: 0.08
-    });
+    var obs = new IntersectionObserver(
+      function (entries, observer) {
+
+        entries.forEach(function (entry) {
+
+          if (entry.isIntersecting) {
+
+            entry.target.classList.add('in');
+
+            observer.unobserve(entry.target);
+          }
+        });
+
+      },
+      {
+        rootMargin: '0px 0px -8% 0px',
+        threshold: 0.08
+      }
+    );
 
     items.forEach(function (el) {
       obs.observe(el);
     });
   }
 
-  /* ---- RSVP form (front-end only) ----------------------------------- */
+
+  /* ---- RSVP Form (Front-end only) ----------------------------------- */
+
   function initRsvp() {
+
     var form = document.getElementById('rsvpForm');
     var success = document.getElementById('rsvpSuccess');
 
     if (!form || !success) return;
 
     form.addEventListener('submit', function (e) {
+
       e.preventDefault();
 
       if (!form.checkValidity()) {
@@ -205,11 +284,13 @@
       );
 
       if (declined && declined.value === 'no') {
+
         success.innerHTML =
           "Thank you for letting us know — you'll be missed. We'll raise a glass to you! 🥂";
       }
 
       form.style.display = 'none';
+
       success.classList.add('show');
 
       success.scrollIntoView({
@@ -219,127 +300,187 @@
     });
   }
 
-  /* ---- Auto Scroll -------------------------------------------------- */
+
+  /* ---- Auto Scroll: Tap Anywhere to Play / Pause -------------------- */
+
   function initAutoScroll() {
 
-    // Create floating controls using JavaScript
-    var controls = document.createElement('div');
+    var running = false;
+    var animation = null;
+    var lastTime = 0;
 
-    controls.style.cssText = [
-      'position:fixed',
-      'right:20px',
-      'bottom:20px',
-      'z-index:99999',
-      'display:flex',
-      'gap:8px',
-      'padding:10px',
-      'background:rgba(255,255,255,0.95)',
-      'border:1px solid #e8e0d8',
-      'border-radius:50px',
-      'box-shadow:0 4px 20px rgba(0,0,0,0.12)'
-    ].join(';');
-
-    document.body.appendChild(controls);
-
-    function createButton(label) {
-      var btn = document.createElement('button');
-
-      btn.textContent = label;
-
-      btn.style.cssText = [
-        'border:none',
-        'padding:9px 15px',
-        'border-radius:30px',
-        'cursor:pointer',
-        'background:#8b6f60',
-        'color:white',
-        'font-size:13px'
-      ].join(';');
-
-      controls.appendChild(btn);
-      return btn;
-    }
-
-    var play = createButton('▶ Play');
-    var pause = createButton('⏸ Pause');
-    var stop = createButton('■ Stop');
-
-    var timer = null;
-    var speed = 1;
-    var interval = 20;
+    var speed = 25; // Pixels per second
     var loop = true;
 
+    // Prevent accidental double initialization
+    if (window.everlyAutoScrollInitialized) return;
+
+    window.everlyAutoScrollInitialized = true;
+
+
+    /* Start scrolling */
     function startScroll() {
-      if (timer || reduceMotion) return;
 
-      timer = setInterval(function () {
+      if (running || reduceMotion) return;
 
-        // Don't scroll while mobile menu is open
-        var menu = document.getElementById('navMenu');
+      running = true;
 
-        if (menu && menu.classList.contains('open')) {
-          return;
-        }
+      lastTime = 0;
+
+      animation = requestAnimationFrame(scrollFrame);
+    }
+
+
+    /* Pause without resetting scroll position */
+    function pauseScroll() {
+
+      running = false;
+
+      if (animation !== null) {
+
+        cancelAnimationFrame(animation);
+
+        animation = null;
+      }
+
+      lastTime = 0;
+    }
+
+
+    /* Scroll animation */
+    function scrollFrame(time) {
+
+      if (!running) return;
+
+      if (!lastTime) {
+        lastTime = time;
+      }
+
+      var delta = Math.min(time - lastTime, 50);
+
+      lastTime = time;
+
+      var menu = document.getElementById('navMenu');
+
+      // Pause scrolling while mobile menu is open
+      if (!menu || !menu.classList.contains('open')) {
 
         var maxScroll =
-          document.documentElement.scrollHeight - window.innerHeight;
+          document.documentElement.scrollHeight -
+          window.innerHeight;
 
-        if (maxScroll <= 0) return;
+        if (maxScroll > 0) {
 
-        if (window.scrollY >= maxScroll - 2) {
+          if (window.scrollY >= maxScroll - 2) {
 
-          if (loop) {
-            window.scrollTo(0, 0);
+            if (loop) {
+
+              // Restart only after reaching the bottom
+              window.scrollTo(0, 0);
+
+            } else {
+
+              pauseScroll();
+
+              return;
+            }
+
           } else {
-            pauseScroll();
+
+            window.scrollBy(
+              0,
+              speed * delta / 1000
+            );
           }
-
-          return;
         }
+      }
 
-        window.scrollBy(0, speed);
-
-      }, interval);
+      animation = requestAnimationFrame(scrollFrame);
     }
 
-    function pauseScroll() {
-      clearInterval(timer);
-      timer = null;
+
+    /* Check whether the user tapped an interactive element */
+    function isInteractive(target) {
+
+      if (!target || !target.closest) return false;
+
+      return !!target.closest(
+        'a, button, input, textarea, select, label, ' +
+        'form, video, audio, [role="button"], ' +
+        '[contenteditable="true"], #navToggle, #navBackdrop'
+      );
     }
 
-    function stopScroll() {
-      pauseScroll();
 
-      window.scrollTo({
-        top: 0,
-        behavior: reduceMotion ? 'auto' : 'smooth'
-      });
-    }
+    /* Tap anywhere to toggle Play / Pause */
+    document.addEventListener('click', function (e) {
 
-    play.addEventListener('click', startScroll);
-    pause.addEventListener('click', pauseScroll);
-    stop.addEventListener('click', stopScroll);
+      // Don't interrupt buttons, links or forms
+      if (isInteractive(e.target)) return;
 
-    // Automatically start when website opens
+      // Ignore clicks when mobile menu is open
+      var menu = document.getElementById('navMenu');
+
+      if (menu && menu.classList.contains('open')) return;
+
+      if (running) {
+
+        // First tap: Pause
+        pauseScroll();
+
+        console.log('Everly scrolling paused');
+
+      } else {
+
+        // Second tap: Resume from current position
+        startScroll();
+
+        console.log('Everly scrolling resumed');
+      }
+
+    });
+
+
+    /* Automatically start when website opens */
     if (!reduceMotion) {
       startScroll();
     }
+
+    console.log('Everly Tap-to-Play/Pause initialized!');
   }
 
+
   /* ---- Boot --------------------------------------------------------- */
+
   function boot() {
+
     initHeader();
+
     initMobileNav();
+
     initCountdown();
+
     initScrollSpy();
+
     initReveal();
+
     initRsvp();
+
     initAutoScroll();
   }
 
+
+  /* ---- Initialize Website ------------------------------------------- */
+
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', boot);
+
+    document.addEventListener(
+      'DOMContentLoaded',
+      boot
+    );
+
   } else {
+
     boot();
   }
 
